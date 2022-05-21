@@ -107,7 +107,7 @@ static void print_usage()
     fprintf(stderr, "  -h                   show this help\n");
     fprintf(stderr, "  -i input-path        input image path (jpg/png/webp) or directory\n");
     fprintf(stderr, "  -o output-path       output image path (jpg/png/webp) or directory\n");
-    fprintf(stderr, "  -s scale             upscale ratio (can be 2, 3, 4. default=4)\n");
+    fprintf(stderr, "  -s scale             upscale ratio (default=4)\n");
     fprintf(stderr, "  -t tile-size         tile size (>=32/0=auto, default=0) can be 0,0,0 for multi-gpu\n");
     fprintf(stderr, "  -m model-path        folder path to the pre-trained models. default=models\n");
     fprintf(stderr, "  -n model-name        model name (default=realesr-animevideov3, can be realesr-animevideov3 | realesrgan-x4plus | realesrgan-x4plus-anime | realesrnet-x4plus)\n");
@@ -671,18 +671,7 @@ int main(int argc, char** argv)
         }
     }
 
-    int prepadding = 0;
-
-    if (model.find(PATHSTR("models")) != path_t::npos
-        || model.find(PATHSTR("models2")) != path_t::npos)
-    {
-        prepadding = 10;
-    }
-    else
-    {
-        fprintf(stderr, "unknown model dir type\n");
-        return -1;
-    }
+    int prepadding = 10;
 
     // if (modelname.find(PATHSTR("realesrgan-x4plus")) != path_t::npos
     //     || modelname.find(PATHSTR("realesrnet-x4plus")) != path_t::npos
@@ -698,29 +687,14 @@ int main(int argc, char** argv)
     wchar_t parampath[256];
     wchar_t modelpath[256];
 
-    if (modelname == PATHSTR("realesr-animevideov3"))
-    {
-        swprintf(parampath, 256, L"%s/%s-x%s.param", model.c_str(), modelname.c_str(), std::to_string(scale));
-        swprintf(modelpath, 256, L"%s/%s-x%s.bin", model.c_str(), modelname.c_str(), std::to_string(scale));
-    }
-    else{
-        swprintf(parampath, 256, L"%s/%s.param", model.c_str(), modelname.c_str());
-        swprintf(modelpath, 256, L"%s/%s.bin", model.c_str(), modelname.c_str());
-    }
-
+    swprintf(parampath, 256, L"%s/%s.param", model.c_str(), modelname.c_str());
+    swprintf(modelpath, 256, L"%s/%s.bin", model.c_str(), modelname.c_str());
 #else
     char parampath[256];
     char modelpath[256];
 
-    if (modelname == PATHSTR("realesr-animevideov3"))
-    {
-        sprintf(parampath, "%s/%s-x%s.param", model.c_str(), modelname.c_str(), std::to_string(scale).c_str());
-        sprintf(modelpath, "%s/%s-x%s.bin", model.c_str(), modelname.c_str(), std::to_string(scale).c_str());
-    }
-    else{
-        sprintf(parampath, "%s/%s.param", model.c_str(), modelname.c_str());
-        sprintf(modelpath, "%s/%s.bin", model.c_str(), modelname.c_str());
-    }
+    sprintf(parampath, "%s/%s.param", model.c_str(), modelname.c_str());
+    sprintf(modelpath, "%s/%s.bin", model.c_str(), modelname.c_str());
 #endif
 
     path_t paramfullpath = sanitize_filepath(parampath);
@@ -781,17 +755,14 @@ int main(int argc, char** argv)
         uint32_t heap_budget = ncnn::get_gpu_device(gpuid[i])->get_heap_budget();
 
         // more fine-grained tilesize policy here
-        if (model.find(PATHSTR("models")) != path_t::npos)
-        {
-            if (heap_budget > 1900)
-                tilesize[i] = 200;
-            else if (heap_budget > 550)
-                tilesize[i] = 100;
-            else if (heap_budget > 190)
-                tilesize[i] = 64;
-            else
-                tilesize[i] = 32;
-        }
+        if (heap_budget > 1900)
+            tilesize[i] = 200;
+        else if (heap_budget > 550)
+            tilesize[i] = 100;
+        else if (heap_budget > 190)
+            tilesize[i] = 64;
+        else
+            tilesize[i] = 32;
     }
 
     {
@@ -801,11 +772,11 @@ int main(int argc, char** argv)
         {
             realesrgan[i] = new RealESRGAN(gpuid[i], tta_mode);
 
-            realesrgan[i]->load(paramfullpath, modelfullpath);
-
             realesrgan[i]->scale = scale;
             realesrgan[i]->tilesize = tilesize[i];
             realesrgan[i]->prepadding = prepadding;
+
+            realesrgan[i]->load(paramfullpath, modelfullpath);
         }
 
         // main routine

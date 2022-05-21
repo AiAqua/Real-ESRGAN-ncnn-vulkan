@@ -62,7 +62,7 @@ Usage: realesrgan-ncnn-vulkan.exe -i infile -o outfile [options]...
   -h                   show this help"
   -i input-path        input image path (jpg/png/webp) or directory"
   -o output-path       output image path (jpg/png/webp) or directory"
-  -s scale             upscale ratio (can be 2, 3, 4. default=4)"
+  -s scale             upscale ratio (default=4)"
   -t tile-size         tile size (>=32/0=auto, default=0) can be 0,0,0 for multi-gpu"
   -m model-path        folder path to the pre-trained models. default=models"
   -n model-name        model name (default=realesr-animevideov3, can be realesr-animevideov3 | realesrgan-x4plus | realesrgan-x4plus-anime | realesrnet-x4plus)"
