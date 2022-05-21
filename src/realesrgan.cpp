@@ -43,7 +43,7 @@ static const uint32_t realesrgan_postproc_tta_int8s_spv_data[] = {
     #include "realesrgan_postproc_tta_int8s.spv.hex.h"
 };
 
-RealESRGAN::RealESRGAN(int gpuid, bool _tta_mode)
+RealESRGAN::RealESRGAN(int gpuid, bool _tta_mode, bool _quiet)
 {
     net.opt.use_vulkan_compute = true;
     net.opt.use_fp16_packed = true;
@@ -58,6 +58,7 @@ RealESRGAN::RealESRGAN(int gpuid, bool _tta_mode)
     realesrgan_postproc = 0;
     bicubic = 0;
     tta_mode = _tta_mode;
+    quiet = _quiet;
 }
 
 RealESRGAN::~RealESRGAN()
@@ -502,7 +503,9 @@ int RealESRGAN::process(const ncnn::Mat& inimage, ncnn::Mat& outimage) const
                 cmd.reset();
             }
 
-            fprintf(stderr, "%.2f%%\n", (float)(yi * xtiles + xi) / (ytiles * xtiles) * 100);
+            if (!quiet){
+                fprintf(stderr, "%.2f%%\n", (float)(yi * xtiles + xi) / (ytiles * xtiles) * 100);
+            }
         }
 
         // download

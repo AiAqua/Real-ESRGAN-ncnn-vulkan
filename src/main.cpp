@@ -115,6 +115,7 @@ static void print_usage()
     fprintf(stderr, "  -j load:proc:save    thread count for load/proc/save (default=1:2:2) can be 1:2,2,2:2 for multi-gpu\n");
     fprintf(stderr, "  -x                   enable tta mode\n");
     fprintf(stderr, "  -f format            output image format (jpg/png/webp, default=ext/png)\n");
+    fprintf(stderr, "  -q                   disable progress printer\n");
     fprintf(stderr, "  -v                   verbose output\n");
 }
 
@@ -446,12 +447,13 @@ int main(int argc, char** argv)
     int jobs_save = 2;
     int verbose = 0;
     int tta_mode = 0;
+    int quiet = 0;
     path_t format = PATHSTR("png");
 
 #if _WIN32
     setlocale(LC_ALL, "");
     wchar_t opt;
-    while ((opt = getopt(argc, argv, L"i:o:s:t:m:n:g:j:f:vxh")) != (wchar_t)-1)
+    while ((opt = getopt(argc, argv, L"i:o:s:t:m:n:g:j:f:vxqh")) != (wchar_t)-1)
     {
         switch (opt)
         {
@@ -489,6 +491,9 @@ int main(int argc, char** argv)
         case L'x':
             tta_mode = 1;
             break;
+        case L'q':
+            quiet = 1;
+            break;
         case L'h':
         default:
             print_usage();
@@ -497,7 +502,7 @@ int main(int argc, char** argv)
     }
 #else // _WIN32
     int opt;
-    while ((opt = getopt(argc, argv, "i:o:s:t:m:n:g:j:f:vxh")) != -1)
+    while ((opt = getopt(argc, argv, "i:o:s:t:m:n:g:j:f:vxqh")) != -1)
     {
         switch (opt)
         {
@@ -534,6 +539,9 @@ int main(int argc, char** argv)
             break;
         case 'x':
             tta_mode = 1;
+            break;
+        case L'q':
+            quiet = 1;
             break;
         case 'h':
         default:
@@ -770,7 +778,7 @@ int main(int argc, char** argv)
 
         for (int i=0; i<use_gpu_count; i++)
         {
-            realesrgan[i] = new RealESRGAN(gpuid[i], tta_mode);
+            realesrgan[i] = new RealESRGAN(gpuid[i], tta_mode, quiet);
 
             realesrgan[i]->scale = scale;
             realesrgan[i]->tilesize = tilesize[i];

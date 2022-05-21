@@ -70,6 +70,7 @@ Usage: realesrgan-ncnn-vulkan.exe -i infile -o outfile [options]...
   -j load:proc:save    thread count for load/proc/save (default=1:2:2) can be 1:2,2,2:2 for multi-gpu"
   -x                   enable tta mode"
   -f format            output image format (jpg/png/webp, default=ext/png)"
+  -q                   disable progress printer
   -v                   verbose output"
 ```
 
